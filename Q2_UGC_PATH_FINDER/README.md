@@ -38,7 +38,7 @@ The system uses:
 
 ## Project Structure
 ```
-├── main.py
+├── path_planner.py
 ├── README.md
 ├── requirements.txt
 ├── .gitignore
