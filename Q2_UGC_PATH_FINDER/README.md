@@ -54,10 +54,10 @@ pip install matplotlib
 ---
 
 ##  Sample Input
-Enter grid size: 20
-Enter density (low/medium/high): medium
-Enter start (x y): 0 0
-Enter goal (x y): 19 19
+- Enter grid size: 20
+- Enter density (low/medium/high): medium
+- Enter start (x y): 0 0
+- Enter goal (x y): 19 19
 
 ## Output Metrics (MOE)
 
