@@ -8,14 +8,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_KEY = os.environ.get("GOOGLE_API_KEY")
-CACHE_FILE = "graph_cache.json"
-GMAPS_URL = "https://maps.googleapis.com/maps/api/distancematrix/json"
-MAX_ORIGINS = 25
-MAX_DESTINATIONS = 25
-DISTANCE_THRESHOLD_KM = int(2 * pi * 100)
+API_KEY=os.environ.get("GOOGLE_API_KEY")
+CACHE_FILE="graph_cache.json"
+GMAPS_URL="https://maps.googleapis.com/maps/api/distancematrix/json"
+MAX_ORIGINS=25
+MAX_DESTINATIONS=25
+DISTANCE_THRESHOLD_KM=int(2 * pi * 100)
 
-DEFAULT_CITIES = [
+DEFAULT_CITIES=[
     "Delhi", "Mumbai", "Chennai", "Kolkata", "Bengaluru",
     "Hyderabad", "Ahmedabad", "Pune", "Jaipur", "Lucknow",
     "Vijayawada", "Guwahati", "Visakhapatnam", "Bhopal", "Nagpur",
@@ -33,7 +33,7 @@ def loadCache():
         return None, None
     try:
         with open(CACHE_FILE) as f:
-            data = json.load(f)
+            data=json.load(f)
         return data["graph"], data["cities"]
     except (json.JSONDecodeError, KeyError):
         print("Cache file corrupted, will rebuild.")
@@ -41,26 +41,26 @@ def loadCache():
 
 
 def chunk(lst, size):
-    it = iter(lst)
+    it=iter(lst)
     while True:
-        batch = list(islice(it, size))
+        batch=list(islice(it, size))
         if not batch:
             break
         yield batch
 
 
 def getDistances(origins, destinations):
-    graph_part = {city: {} for city in origins}
+    graphPart={city: {} for city in origins}
 
-    for o_batch in chunk(origins, MAX_ORIGINS):
-        for d_batch in chunk(destinations, MAX_DESTINATIONS):
-            params = {
-                "origins": "|".join(o_batch),
-                "destinations": "|".join(d_batch),
+    for oBatch in chunk(origins, MAX_ORIGINS):
+        for dBatch in chunk(destinations, MAX_DESTINATIONS):
+            parameters={
+                "origins": "|".join(oBatch),
+                "destinations": "|".join(dBatch),
                 "key": API_KEY,
             }
             try:
-                resp = requests.get(GMAPS_URL, params=params, timeout=10).json()
+                resp=requests.get(GMAPS_URL, parameters=parameters, timeout=10).json()
             except requests.RequestException as e:
                 print(f"Network error: {e}")
                 return None
@@ -69,26 +69,26 @@ def getDistances(origins, destinations):
                 print(f"API error: {resp.get('status')} — {resp.get('error_message', 'no details')}")
                 return None
 
-            for i, origin in enumerate(o_batch):
-                for j, dest in enumerate(d_batch):
+            for i, origin in enumerate(oBatch):
+                for j, dest in enumerate(dBatch):
                     if origin == dest:
                         continue
                     try:
-                        element = resp["rows"][i]["elements"][j]
+                        element=resp["rows"][i]["elements"][j]
                         if element["status"] != "OK":
                             continue
-                        km = element["distance"]["value"] // 1000
+                        km=element["distance"]["value"] // 1000
                         if km <= DISTANCE_THRESHOLD_KM:
-                            graph_part[origin][dest] = km
+                            graphPart[origin][dest]=km
                     except (KeyError, IndexError) as e:
                         print(f"Warning: missing data for {origin} → {dest}: {e}")
 
-    return graph_part
+    return graphPart
 
 
 def buildFullGraph(cities):
     print(f"Building full graph for {len(cities)} cities (threshold: {DISTANCE_THRESHOLD_KM} km)...")
-    part = getDistances(cities, cities)
+    part=getDistances(cities, cities)
     if part is None:
         return None
     print("Graph built.")
@@ -97,55 +97,55 @@ def buildFullGraph(cities):
 
 def addCities(graph, cityList, newCities):
     print(f"Fetching edges for {len(newCities)} new cities...")
-    all_cities = cityList + newCities
+    all_cities=cityList+newCities
 
-    part1 = getDistances(newCities, all_cities)
+    part1=getDistances(newCities,all_cities)
     if part1 is None:
         return None, None
 
-    part2 = getDistances(cityList, newCities)
+    part2=getDistances(cityList,newCities)
     if part2 is None:
         return None, None
 
     for city in newCities:
-        graph[city] = part1.get(city, {})
+        graph[city]=part1.get(city,{})
 
     for city in cityList:
-        graph[city].update(part2.get(city, {}))
+        graph[city].update(part2.get(city,{}))
 
     return graph, all_cities
 
 
 def dijkstra(graph, start):
-    dist = {node: float("inf") for node in graph}
-    parent = {node: None for node in graph}
-    dist[start] = 0
-    pq = [(0, start)]
+    dist={node: float("inf") for node in graph}
+    parent={node: None for node in graph}
+    dist[start]=0
+    pq=[(0,start)]
 
     while pq:
-        cost, node = heapq.heappop(pq)
+        cost, node=heapq.heappop(pq)
         if cost > dist[node]:
             continue
         for neighbor, weight in graph[node].items():
-            newCost = cost + weight
+            newCost=cost + weight
             if newCost < dist[neighbor]:
-                dist[neighbor] = newCost
-                parent[neighbor] = node
+                dist[neighbor]=newCost
+                parent[neighbor]=node
                 heapq.heappush(pq, (newCost, neighbor))
 
     return dist, parent
 
 
 def getPath(parent, dest):
-    path = []
-    visited = set()
+    path=[]
+    visited=set()
     while dest is not None:
         if dest in visited:
             print("Warning: cycle detected in path.")
             break
         visited.add(dest)
         path.append(dest)
-        dest = parent[dest]
+        dest=parent[dest]
     return path[::-1]
 
 
@@ -161,7 +161,7 @@ def requireApiKey():
     return True
 
 
-graph, cityList = loadCache()
+graph, cityList=loadCache()
 
 if graph is None:
     print(f"No cache found. Building default graph for {len(DEFAULT_CITIES)} cities...")
@@ -171,9 +171,9 @@ if graph is None:
     graph = buildFullGraph(DEFAULT_CITIES)
     if graph is None:
         print("Failed to build graph on startup.")
-        cityList = DEFAULT_CITIES[:]
+        cityList=DEFAULT_CITIES[:]
     else:
-        cityList = DEFAULT_CITIES[:]
+        cityList=DEFAULT_CITIES[:]
         saveCache(graph, cityList)
         print("Graph ready.\n")
 else:
@@ -187,7 +187,7 @@ while True:
     print("5. Exit")
 
     try:
-        choice = int(input("Choice: "))
+        choice=int(input("Choice: "))
     except ValueError:
         print("Please enter a number between 1 and 5.\n")
         continue
@@ -196,9 +196,9 @@ while True:
         if not requireApiKey():
             print()
             continue
-        raw = input("Enter cities (comma-separated): ").split(",")
-        new = [clean(c) for c in raw]
-        new = list(dict.fromkeys(c for c in new if c not in cityList))
+        raw=input("Enter cities (comma-separated): ").split(",")
+        new=[clean(c) for c in raw]
+        new=list(dict.fromkeys(c for c in new if c not in cityList))
         if not new:
             print("All cities already in graph.\n")
             continue
@@ -207,8 +207,8 @@ while True:
         if updated_graph is None:
             print("Could not expand graph.\n")
         else:
-            graph = updated_graph
-            cityList = updated_cities
+            graph=updated_graph
+            cityList=updated_cities
             saveCache(graph, cityList)
             print(f"Graph updated. Now {len(cityList)} cities.\n")
 
@@ -217,11 +217,11 @@ while True:
             print()
             continue
         print(f"Rebuilding graph for {len(cityList)} cities...")
-        rebuilt = buildFullGraph(cityList)
+        rebuilt=buildFullGraph(cityList)
         if rebuilt is None:
             print("Rebuild failed, keeping existing graph.\n")
         else:
-            graph = rebuilt
+            graph=rebuilt
             saveCache(graph, cityList)
             print("Graph rebuilt.\n")
 
@@ -230,19 +230,19 @@ while True:
             print("Graph unavailable. Use option 2 to rebuild.\n")
             continue
         print(f"Cities: {', '.join(cityList)}\n")
-        src = clean(input("Source: "))
-        dst = clean(input("Destination: "))
+        src=clean(input("Source: "))
+        dst=clean(input("Destination: "))
         if src not in graph or dst not in graph:
             print("City not found. Check spelling or add it with option 1.\n")
             continue
         if src == dst:
             print("Source and destination are the same — distance is 0 km.\n")
             continue
-        dist, parent = dijkstra(graph, src)
+        dist, parent=dijkstra(graph, src)
         if dist[dst] == float("inf"):
             print(f"No road path found between {src} and {dst}.\n")
         else:
-            path = getPath(parent, dst)
+            path=getPath(parent, dst)
             print(f"\nDistance : {dist[dst]} km")
             print(f"Path     : {' → '.join(path)}")
             print(f"Intermediate Cities    : {len(path) - 1}\n")
