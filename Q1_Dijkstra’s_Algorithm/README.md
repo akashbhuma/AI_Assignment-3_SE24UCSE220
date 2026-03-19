@@ -32,12 +32,12 @@ It models cities as nodes in a graph and uses **Dijkstra’s Algorithm** to comp
 ---
 
 ## Project Structure
-'''
+```
 .
 ├── indian_pathSearcher.py
 ├── graph_cache.json (auto-generated)
 ├── .env (not included)
-'''
+```
 
 ---
 
