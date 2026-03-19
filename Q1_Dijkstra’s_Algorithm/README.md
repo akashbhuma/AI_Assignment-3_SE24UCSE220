@@ -6,7 +6,6 @@
 ## Overview
 
 RouteGraph is a Python-based system that finds the shortest path between cities using real-world distance data from the Google Distance Matrix API.
-
 It models cities as nodes in a graph and uses **Dijkstra’s Algorithm** to compute the most efficient route.
 
 ---
@@ -33,11 +32,12 @@ It models cities as nodes in a graph and uses **Dijkstra’s Algorithm** to comp
 ---
 
 ## Project Structure
+'''
 .
 ├── indian_pathSearcher.py
 ├── graph_cache.json (auto-generated)
 ├── .env (not included)
-
+'''
 
 ---
 
