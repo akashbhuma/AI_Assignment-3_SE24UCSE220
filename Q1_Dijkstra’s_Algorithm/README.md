@@ -1,4 +1,4 @@
-# RouteGraph
+# Indian Path Searcher
 ### A Distance-Based Pathfinding System using Dijkstra’s Algorithm
 
 ---
