@@ -23,8 +23,8 @@ Extend the above problem by considering dynamic obstacles that are not known bef
 ## Code Files
 
 * `indian_pathSearcher.py` → Implementation of Dijkstra’s algorithm on city graph
-* `UGV_PATH_FINDER.py` → UGV path planning with static obstacles using A*
-* `UGV_Dynamic_D*lite.py` → UGV navigation with dynamic obstacles using replanning A*
+* `path_planner.py` → UGV path planning with static obstacles using A*
+* `D*_Lite_Algo.py` → UGV navigation with dynamic obstacles using replanning A*
 
 ---
 ## Student Details
